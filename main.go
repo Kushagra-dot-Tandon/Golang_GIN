@@ -12,8 +12,6 @@ func main() {
 	fmt.Println("Kushagra_Maple_Labs")
 	r := gin.Default()
 
-	// STACKOVERFLOW PROBLEM SOLUTION -> SUBROUTING In GOLANG
-
 	r.POST("/awsconnect", func(c *gin.Context) {
 		data := c.Request.Body
 		value, err := ioutil.ReadAll(data)
@@ -25,6 +23,7 @@ func main() {
 			"data":    string(value),
 		})
 	})
+	// STACKOVERFLOW PROBLEM SOLUTION -> SUBROUTING In GOLANG
 
 	resources := r.Group("/resources")
 	{
