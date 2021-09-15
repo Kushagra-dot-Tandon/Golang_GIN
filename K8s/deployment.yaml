@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gogin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gogin
+  template:
+    metadata:
+      labels:
+        app: gogin
+    spec:
+      containers:
+        - name: gogin
+          image: kushagratandon12/gingo:3
+          command:
+          ports:
+            - containerPort: 8080
+          volumeMount:
+            - name: config
+              mountPath: /config/
+      volumes:
+        - name: config
+          configMap:
+              name: config
