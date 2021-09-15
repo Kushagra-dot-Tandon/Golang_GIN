@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +23,32 @@ func main() {
 		c.JSON(200, gin.H{
 			"message": "Hello Kushagra_Maple_Labs AWS Connect",
 			"data":    string(value),
+		})
+	})
+
+	r.POST("/readconfig", func(c *gin.Context) {
+		file, err := os.Open("./config/config.json")
+		if err != nil {
+			fmt.Print(err)
+		}
+
+		type awsconnect struct {
+			Bucket_name string `json:"bucket_name"`
+			Region_name string `json:"region_name"`
+		}
+
+		var aws awsconnect
+		decoder := json.NewDecoder(file)
+
+		err = decoder.Decode(&aws)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		fmt.Println(aws)
+		c.JSON(200, gin.H{
+			"message":     "Hello Kushagra_Maple_Labs AWS Connect",
+			"bucket_name": aws.Bucket_name,
+			"region":      aws.Region_name,
 		})
 	})
 	// STACKOVERFLOW PROBLEM SOLUTION -> SUBROUTING In GOLANG
