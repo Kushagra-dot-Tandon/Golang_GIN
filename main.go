@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -47,10 +46,10 @@ func main() {
 	//Initalization of GIN
 	r := gin.Default()
 
+	// Connect to Database
 	db := connect_db()
+	//Close the Database after main is over
 	defer db.Close()
-
-	fmt.Printf("Database Connection Successful \n")
 
 	r.POST("/update_process", func(c *gin.Context) {
 		var data_json request_json
@@ -61,7 +60,7 @@ func main() {
 
 	// READING DATA FROM JSONFILE
 	r.POST("/readconfig", func(c *gin.Context) {
-		file, err := os.Open("./config/config.json")
+		file, err := os.Open("./config/aws.json")
 		CheckError(err)
 
 		// Declaration for the json_data
