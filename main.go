@@ -9,17 +9,20 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
+// Define the type of the request_JSON
 type request_json struct {
 	APPID  int    `json:appid`
 	Status string `json:status`
 	User   string `json:user`
 }
 
+//Define the type of the AWS
 type awsconnect struct {
 	Bucket_name string `json:"bucket_name"`
 	Region_name string `json:"region_name"`
 }
 
+//Define the type of the database
 type AppProcess struct {
 	gorm.Model
 	AppID  int
@@ -27,6 +30,7 @@ type AppProcess struct {
 	User   string
 }
 
+//check_error
 func CheckError(err error) {
 	if err != nil {
 		panic(err)
@@ -82,10 +86,10 @@ func main() {
 	resources := r.Group("/resources")
 	{
 		resources.GET("/:id", func(c *gin.Context) {
-			res_id := c.Param("id")
+			id := c.Param("id")
 			c.JSON(200, gin.H{
 				"route":        true,
-				"resources_id": res_id,
+				"resources_id": id,
 			})
 		})
 
@@ -94,9 +98,11 @@ func main() {
 			subresource := id.Group("/subresource")
 			{
 				subresource.GET("/:newid", func(c *gin.Context) {
+					new_id := c.Param("newid")
 					c.JSON(200, gin.H{
 						"route":       true,
-						"subresource": "Working Perfectly_In_SubRoute",
+						"subresource": "Working Perfectly_In_Sub_Route",
+						"data_new_id": new_id,
 					})
 				})
 			}
