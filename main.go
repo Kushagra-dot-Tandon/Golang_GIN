@@ -10,7 +10,6 @@ import (
 
 func main() {
 
-	fmt.Println("Kushagra_Maple_Labs")
 	r := gin.Default()
 
 	r.POST("/awsconnect", func(c *gin.Context) {
@@ -50,6 +49,7 @@ func main() {
 			"region":      aws.Region_name,
 		})
 	})
+
 	// STACKOVERFLOW PROBLEM SOLUTION -> SUBROUTING In GOLANG
 
 	resources := r.Group("/resources")
