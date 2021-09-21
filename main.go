@@ -10,13 +10,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-func CheckError(err error) {
-	if err != nil {
-		panic(err)
-	}
-
-}
-
 type request_json struct {
 	APPID  int    `json:appid`
 	Status string `json:status`
@@ -30,10 +23,23 @@ type awsconnect struct {
 
 type AppProcess struct {
 	gorm.Model
-
 	AppID  int
 	Status string
 	User   string
+}
+
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+func connect_db() *gorm.DB {
+	//Initalization of DATABASE
+	db, err := gorm.Open("postgres", "user=postgres password=kush dbname=gorm sslmode=disable")
+	CheckError(err)
+	return db
 }
 
 func main() {
@@ -41,17 +47,10 @@ func main() {
 	//Initalization of GIN
 	r := gin.Default()
 
-	//Initalization of DATABASE
-	db, err := gorm.Open("postgres", "user=postgres password=kush dbname=gorm sslmode=disable")
-	CheckError(err)
-
+	db := connect_db()
 	defer db.Close()
 
-	database := db.DB()
-	err = database.Ping()
-	CheckError(err)
-
-	fmt.Printf("Database Connection Successful")
+	fmt.Printf("Database Connection Successful \n")
 
 	r.POST("/update_process", func(c *gin.Context) {
 		var data_json request_json
