@@ -3,46 +3,75 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
+
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
+
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+type request_json struct {
+	APPID  int    `json:appid`
+	Status string `json:status`
+	User   string `json:user`
+}
+
+type awsconnect struct {
+	Bucket_name string `json:"bucket_name"`
+	Region_name string `json:"region_name"`
+}
+
+type AppProcess struct {
+	gorm.Model
+
+	AppID  int
+	Status string
+	User   string
+}
 
 func main() {
 
+	//Initalization of GIN
 	r := gin.Default()
 
-	r.POST("/awsconnect", func(c *gin.Context) {
-		data := c.Request.Body
-		value, err := ioutil.ReadAll(data)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		c.JSON(200, gin.H{
-			"message": "Hello Kushagra_Maple_Labs AWS Connect",
-			"data":    string(value),
-		})
+	//Initalization of DATABASE
+	db, err := gorm.Open("postgres", "user=postgres password=kush dbname=gorm sslmode=disable")
+	CheckError(err)
+
+	defer db.Close()
+
+	database := db.DB()
+	err = database.Ping()
+	CheckError(err)
+
+	fmt.Printf("Database Connection Successful")
+
+	r.POST("/update_process", func(c *gin.Context) {
+		var data_json request_json
+		c.BindJSON(&data_json)
+		var data_to_database = &AppProcess{AppID: data_json.APPID, Status: data_json.Status, User: data_json.User}
+		db.Create(data_to_database)
 	})
 
+	// READING DATA FROM JSONFILE
 	r.POST("/readconfig", func(c *gin.Context) {
 		file, err := os.Open("./config/config.json")
-		if err != nil {
-			fmt.Print(err)
-		}
+		CheckError(err)
 
-		type awsconnect struct {
-			Bucket_name string `json:"bucket_name"`
-			Region_name string `json:"region_name"`
-		}
-
+		// Declaration for the json_data
 		var aws awsconnect
 		decoder := json.NewDecoder(file)
 
 		err = decoder.Decode(&aws)
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		fmt.Println(aws)
+		CheckError(err)
+		// fmt.Println(aws)
 		c.JSON(200, gin.H{
 			"message":     "Hello Kushagra_Maple_Labs AWS Connect",
 			"bucket_name": aws.Bucket_name,
