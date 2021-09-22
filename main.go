@@ -62,6 +62,14 @@ func main() {
 		db.Create(data_to_database)
 	})
 
+	// r.GET("/:query_id", func(c *gin.Context) {
+	// 	query_id := c.Param("query_id")
+	// 	sqlStatement := `SELECT status FROM public.app_processes WHERE app_id=;`
+	// 	row := db.DB().QueryRow(sqlStatement)
+	// 	data := row.Scan(&query_id)
+	// 	fmt.Println(data)
+	// })
+
 	// READING DATA FROM JSONFILE
 	r.POST("/readconfig", func(c *gin.Context) {
 		file, err := os.Open("./config/aws.json")
