@@ -40,8 +40,7 @@ func CheckError(err error) {
 
 }
 
-func connect_db() *gorm.DB {
-	//Initalization of DATABASE
+func initDatabase() *gorm.DB {
 	db, err := gorm.Open("postgres", "user=postgres password=kush dbname=gorm sslmode=disable")
 	CheckError(err)
 	return db
@@ -51,12 +50,12 @@ func main() {
 
 	//Initalization of GIN
 	r := gin.Default()
-
 	// Connect to Database
-	db := connect_db()
+	db := initDatabase()
 	//Close the Database after main is over
 	defer db.Close()
 
+	//Update Process => To Update data onto Database
 	r.POST("/update_process", func(c *gin.Context) {
 		var data_json request_json
 		c.BindJSON(&data_json)
@@ -64,9 +63,20 @@ func main() {
 		db.Create(data_to_database)
 	})
 
-	r.GET("total_time/:hour", func(c *gin.Context) {
+	//Query Time => To check the database onto the query
+	r.GET("time_query/:hour", func(c *gin.Context) {
+		// time_select := c.Param("hour")
 		dt := time.Now()
-		fmt.Println(dt.String())
+		var data []AppProcess
+		db.Find(&data)
+		for _, u := range data {
+			database_time := u.CreatedAt
+			diff := dt.Sub(database_time)
+			// fmt.Println(int(diff.Hours()))
+			if int(diff.Hours()) <= 2 {
+				fmt.Println("AppId", u.AppID, "Process", u.Status)
+			}
+		}
 	})
 
 	// READING DATA FROM JSONFILE
