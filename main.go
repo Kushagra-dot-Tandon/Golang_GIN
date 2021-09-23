@@ -75,6 +75,12 @@ func main() {
 		//  iterative onto the database and get all the fields or jobs having timespan less than 2 hours
 		for _, u := range data {
 			fmt.Println(u.AppID)
+			// database_time := u.CreatedAt
+			// diff := dt.Sub(database_time)
+			// fmt.Println(int(diff.Hours()))
+			// if int(diff.Hours()) <= 2 {
+			// 	fmt.Println("AppId", u.AppID, "Process", u.Status)
+			// }
 		}
 	})
 

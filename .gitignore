@@ -1,0 +1,4 @@
+# Debug config Ignore For VScode 
+.vscode/
+#Debug Ignore for env
+*.env
