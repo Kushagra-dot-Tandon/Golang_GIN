@@ -66,16 +66,15 @@ func main() {
 	//Query Time => To check the database onto the query
 	r.GET("time_query/:hour", func(c *gin.Context) {
 		// time_select := c.Param("hour")
-		dt := time.Now()
+		//Intialization the data wrt to our database
 		var data []AppProcess
-		db.Find(&data)
+		// db.find to find and query all the content .......
+		// db.Find(&data)
+		//let us suppose the expiry time is one day before: yesterday so => dt.AddDate(0,0,-1)
+		db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
+		//  iterative onto the database and get all the fields or jobs having timespan less than 2 hours
 		for _, u := range data {
-			database_time := u.CreatedAt
-			diff := dt.Sub(database_time)
-			// fmt.Println(int(diff.Hours()))
-			if int(diff.Hours()) <= 2 {
-				fmt.Println("AppId", u.AppID, "Process", u.Status)
-			}
+			fmt.Println(u.AppID)
 		}
 	})
 
