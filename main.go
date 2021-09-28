@@ -131,5 +131,54 @@ func main() {
 
 		}
 	}
+
+	r.POST("/routine", func(c *gin.Context) {
+		start := time.Now()
+		go func() {
+			var data []AppProcess
+			db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
+			for _, u := range data {
+				fmt.Println(u.AppID)
+			}
+		}()
+
+		go func() {
+			file, err := os.Open("./config/config.json")
+			CheckError(err)
+			// Declaration for the json_data
+			var aws awsconnect
+			decoder := json.NewDecoder(file)
+			err = decoder.Decode(&aws)
+			CheckError(err)
+			fmt.Println(aws.Bucket_name)
+		}()
+
+		elapsed := time.Since(start)
+		fmt.Println(elapsed)
+	})
+
+	r.POST("/routine2", func(c *gin.Context) {
+		// go func() {
+		start := time.Now()
+		var data []AppProcess
+		db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
+		for _, u := range data {
+			fmt.Println(u.AppID)
+		}
+		// }()
+
+		file, err := os.Open("./config/config.json")
+		CheckError(err)
+		// Declaration for the json_data
+		var aws awsconnect
+		decoder := json.NewDecoder(file)
+		err = decoder.Decode(&aws)
+		CheckError(err)
+		fmt.Println(aws.Bucket_name)
+		// }()
+		elapsed := time.Since(start)
+		fmt.Println(elapsed)
+	})
+
 	r.Run()
 }
