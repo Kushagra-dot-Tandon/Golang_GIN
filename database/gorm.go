@@ -35,7 +35,7 @@ func main() {
 	//Inserting the data onto the database
 	db.AutoMigrate(&AppProcess{})
 	// Filling the data onto the database
-	var person = &AppProcess{AppID: 2342, Status: "Pending", User: "Kushagra"}
+	var person = &AppProcess{AppID: 2342, Status: "pending", User: "kushagra"}
 	// updating the data onto the database
 	db.Create(person)
 }
