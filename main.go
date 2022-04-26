@@ -1,14 +1,7 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
-	"time"
-
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // Define the type of the request_JSON
@@ -41,7 +34,7 @@ func CheckError(err error) {
 }
 
 func initDatabase() *gorm.DB {
-	db, err := gorm.Open("postgres", "user=postgres password=kush dbname=gorm sslmode=disable")
+	db, err := gorm.Open("postgres", "host=snappyflow-stage-rds.cmebsmm3knzu.us-west-2.rds.amazonaws.com", "port=5432", "user=archive", "dbname=archive", "password=archive", "sslmode=disable")
 	CheckError(err)
 	return db
 }
@@ -49,136 +42,135 @@ func initDatabase() *gorm.DB {
 func main() {
 
 	//Initalization of GIN
-	r := gin.Default()
 	// Connect to Database
 	db := initDatabase()
 	//Close the Database after main is over
 	defer db.Close()
 
-	//Update Process => To Update data onto Database
-	r.POST("/update_process", func(c *gin.Context) {
-		var data_json request_json
-		c.BindJSON(&data_json)
-		var data_to_database = &AppProcess{AppID: data_json.APPID, Status: data_json.Status, User: data_json.User}
-		db.Create(data_to_database)
-	})
+	// //Update Process => To Update data onto Database
+	// r.POST("/update_process", func(c *gin.Context) {
+	// 	var data_json request_json
+	// 	c.BindJSON(&data_json)
+	// 	var data_to_database = &AppProcess{AppID: data_json.APPID, Status: data_json.Status, User: data_json.User}
+	// 	db.Create(data_to_database)
+	// })
 
-	//Query Time => To check the database onto the query
-	r.GET("time_query/:hour", func(c *gin.Context) {
-		// time_select := c.Param("hour")
-		//Intialization the data wrt to our database
-		var data []AppProcess
-		// db.find to find and query all the content .......
-		// db.Find(&data)
-		//let us suppose the expiry time is one day before: yesterday so => dt.AddDate(0,0,-1)
-		db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
-		//  iterative onto the database and get all the fields or jobs having timespan less than 2 hours
-		for _, u := range data {
-			fmt.Println(u.AppID)
-			// database_time := u.CreatedAt
-			// diff := dt.Sub(database_time)
-			// fmt.Println(int(diff.Hours()))
-			// if int(diff.Hours()) <= 2 {
-			// 	fmt.Println("AppId", u.AppID, "Process", u.Status)
-			// }
-		}
-	})
+	// //Query Time => To check the database onto the query
+	// r.GET("time_query/:hour", func(c *gin.Context) {
+	// 	// time_select := c.Param("hour")
+	// 	//Intialization the data wrt to our database
+	// 	var data []AppProcess
+	// 	// db.find to find and query all the content .......
+	// 	// db.Find(&data)
+	// 	//let us suppose the expiry time is one day before: yesterday so => dt.AddDate(0,0,-1)
+	// 	db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
+	// 	//  iterative onto the database and get all the fields or jobs having timespan less than 2 hours
+	// 	for _, u := range data {
+	// 		fmt.Println(u.AppID)
+	// 		// database_time := u.CreatedAt
+	// 		// diff := dt.Sub(database_time)
+	// 		// fmt.Println(int(diff.Hours()))
+	// 		// if int(diff.Hours()) <= 2 {
+	// 		// 	fmt.Println("AppId", u.AppID, "Process", u.Status)
+	// 		// }
+	// 	}
+	// })
 
-	// READING DATA FROM JSONFILE
-	r.POST("/readconfig", func(c *gin.Context) {
-		file, err := os.Open("./config/aws.json")
-		CheckError(err)
+	// // READING DATA FROM JSONFILE
+	// r.POST("/readconfig", func(c *gin.Context) {
+	// 	file, err := os.Open("./config/aws.json")
+	// 	CheckError(err)
 
-		// Declaration for the json_data
-		var aws awsconnect
-		decoder := json.NewDecoder(file)
+	// 	// Declaration for the json_data
+	// 	var aws awsconnect
+	// 	decoder := json.NewDecoder(file)
 
-		err = decoder.Decode(&aws)
-		CheckError(err)
-		// fmt.Println(aws)
-		c.JSON(200, gin.H{
-			"message":     "Hello Kushagra_Maple_Labs AWS Connect",
-			"bucket_name": aws.Bucket_name,
-			"region":      aws.Region_name,
-		})
-	})
+	// 	err = decoder.Decode(&aws)
+	// 	CheckError(err)
+	// 	// fmt.Println(aws)
+	// 	c.JSON(200, gin.H{
+	// 		"message":     "Hello Kushagra_Maple_Labs AWS Connect",
+	// 		"bucket_name": aws.Bucket_name,
+	// 		"region":      aws.Region_name,
+	// 	})
+	// })
 
-	// STACKOVERFLOW PROBLEM SOLUTION -> SUBROUTING In GOLANG
+	// // STACKOVERFLOW PROBLEM SOLUTION -> SUBROUTING In GOLANG
 
-	resources := r.Group("/resources")
-	{
-		resources.GET("/:id", func(c *gin.Context) {
-			id := c.Param("id")
-			c.JSON(200, gin.H{
-				"route":        true,
-				"resources_id": id,
-			})
-		})
+	// resources := r.Group("/resources")
+	// {
+	// 	resources.GET("/:id", func(c *gin.Context) {
+	// 		id := c.Param("id")
+	// 		c.JSON(200, gin.H{
+	// 			"route":        true,
+	// 			"resources_id": id,
+	// 		})
+	// 	})
 
-		id := resources.Group("/:id")
-		{
-			subresource := id.Group("/subresource")
-			{
-				subresource.GET("/:newid", func(c *gin.Context) {
-					new_id := c.Param("newid")
-					c.JSON(200, gin.H{
-						"route":       true,
-						"subresource": "Working Perfectly_In_Sub_Route",
-						"data_new_id": new_id,
-					})
-				})
-			}
+	// 	id := resources.Group("/:id")
+	// 	{
+	// 		subresource := id.Group("/subresource")
+	// 		{
+	// 			subresource.GET("/:newid", func(c *gin.Context) {
+	// 				new_id := c.Param("newid")
+	// 				c.JSON(200, gin.H{
+	// 					"route":       true,
+	// 					"subresource": "Working Perfectly_In_Sub_Route",
+	// 					"data_new_id": new_id,
+	// 				})
+	// 			})
+	// 		}
 
-		}
-	}
+	// 	}
+	// }
 
-	r.POST("/routine", func(c *gin.Context) {
-		start := time.Now()
-		go func() {
-			var data []AppProcess
-			db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
-			for _, u := range data {
-				fmt.Println(u.AppID)
-			}
-		}()
+	// r.POST("/routine", func(c *gin.Context) {
+	// 	start := time.Now()
+	// 	go func() {
+	// 		var data []AppProcess
+	// 		db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
+	// 		for _, u := range data {
+	// 			fmt.Println(u.AppID)
+	// 		}
+	// 	}()
 
-		go func() {
-			file, err := os.Open("./config/config.json")
-			CheckError(err)
-			// Declaration for the json_data
-			var aws awsconnect
-			decoder := json.NewDecoder(file)
-			err = decoder.Decode(&aws)
-			CheckError(err)
-			fmt.Println(aws.Bucket_name)
-		}()
+	// 	go func() {
+	// 		file, err := os.Open("./config/config.json")
+	// 		CheckError(err)
+	// 		// Declaration for the json_data
+	// 		var aws awsconnect
+	// 		decoder := json.NewDecoder(file)
+	// 		err = decoder.Decode(&aws)
+	// 		CheckError(err)
+	// 		fmt.Println(aws.Bucket_name)
+	// 	}()
 
-		elapsed := time.Since(start)
-		fmt.Println(elapsed)
-	})
+	// 	elapsed := time.Since(start)
+	// 	fmt.Println(elapsed)
+	// })
 
-	r.POST("/routine2", func(c *gin.Context) {
-		// go func() {
-		start := time.Now()
-		var data []AppProcess
-		db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
-		for _, u := range data {
-			fmt.Println(u.AppID)
-		}
-		// }()
+	// r.POST("/routine2", func(c *gin.Context) {
+	// 	// go func() {
+	// 	start := time.Now()
+	// 	var data []AppProcess
+	// 	db.Where("created_at < ?", time.Now().AddDate(0, 0, -1)).Find(&data)
+	// 	for _, u := range data {
+	// 		fmt.Println(u.AppID)
+	// 	}
+	// 	// }()
 
-		file, err := os.Open("./config/config.json")
-		CheckError(err)
-		// Declaration for the json_data
-		var aws awsconnect
-		decoder := json.NewDecoder(file)
-		err = decoder.Decode(&aws)
-		CheckError(err)
-		fmt.Println(aws.Bucket_name)
-		// }()
-		elapsed := time.Since(start)
-		fmt.Println(elapsed)
-	})
+	// 	file, err := os.Open("./config/config.json")
+	// 	CheckError(err)
+	// 	// Declaration for the json_data
+	// 	var aws awsconnect
+	// 	decoder := json.NewDecoder(file)
+	// 	err = decoder.Decode(&aws)
+	// 	CheckError(err)
+	// 	fmt.Println(aws.Bucket_name)
+	// 	// }()
+	// 	elapsed := time.Since(start)
+	// 	fmt.Println(elapsed)
+	// })
 
-	r.Run()
+	// r.Run()
 }
